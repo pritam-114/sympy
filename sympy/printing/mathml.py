@@ -1106,9 +1106,27 @@ class MathMLPresentationPrinter(MathMLPrinterBase):
                                     self._settings['fold_frac_powers']))
                 return x
 
-        if e.exp.is_negative:
+        # This is our custom fix injection block
+        fold_frac_powers = self._settings.get("fold_frac_powers", False)
+        if e.exp.is_negative or fold_frac_powers:
                 top = self.dom.createElement('mfrac')
                 top.appendChild(self._print(1))
+                if e.exp == -1:
+                    top.appendChild(self._print(e.base))
+                else:
+                    x = self.dom.createElement('msup')
+                    x.appendChild(self.parenthesize(e.base, PRECEDENCE['Pow']))
+                    x.appendChild(self._print(-e.exp))
+                    top.appendChild(x)
+                return top
+
+        x = self.dom.createElement('msup')
+        x.appendChild(self.parenthesize(e.base, PRECEDENCE['Pow']))
+        x.appendChild(self._print(e.exp))
+        return x
+
+        
+ld(self._print(1))
                 if e.exp == -1:
                     top.appendChild(self._print(e.base))
                 else:
